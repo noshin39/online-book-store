@@ -1,0 +1,32 @@
+class ShoppingCart {
+    private Book selectedBook;
+
+    public void selectBook(Book book) {
+        this.selectedBook = book;
+    }
+
+    public void viewCart() {
+        if (selectedBook == null) {
+            System.out.println("Your cart is empty.");
+        } else {
+            System.out.println("Selected Book:");
+            System.out.println(selectedBook.getDetails());
+        }
+    }
+
+    public void checkout(User user) {
+        if (selectedBook != null) {
+            System.out.println("Proceeding to checkout for " + user.getUsername());
+            Payment payment = new Payment();
+            if (payment.processPayment(selectedBook.getPrice())) {
+                selectedBook.reduceQuantity();
+                System.out.println("Payment successful! Book purchased.");
+                System.out.println("You have purchased: " + selectedBook.getTitle());
+            } else {
+                System.out.println("Payment failed! Please try again.");
+            }
+        } else {
+            System.out.println("No book selected. Cannot checkout.");
+        }
+    }
+}
