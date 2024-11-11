@@ -1,0 +1,18 @@
+class Payment {
+    private String cardNumber;
+    private boolean paymentStatus;
+
+    public boolean processPayment(double amount) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter your credit card number:");
+        cardNumber = sc.nextLine();
+        if (cardNumber.length() == 16) {
+            paymentStatus = true;
+            System.out.println("Processing payment of $" + amount + "...");
+        } else {
+            paymentStatus = false;
+            System.out.println("Invalid card number!");
+        }
+        return paymentStatus;
+    }
+}
