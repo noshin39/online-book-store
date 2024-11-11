@@ -1,0 +1,37 @@
+class Book {
+    private String bookId;
+    private String title;
+    private String category;
+    private double price;
+    private int availableQuantity;
+
+    public Book(String bookId, String title, String category, double price, int availableQuantity) {
+        this.bookId = bookId;
+        this.title = title;
+        this.category = category;
+        this.price = price;
+        this.availableQuantity = availableQuantity;
+    }
+
+    public boolean checkAvailability() {
+        return availableQuantity > 0;
+    }
+
+    public String getDetails() {
+        return title + " | Category: " + category + " | Price: $" + price + " | Available: " + availableQuantity;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void reduceQuantity() {
+        if (availableQuantity > 0) {
+            availableQuantity--;
+        }
+    }
+}
