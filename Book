@@ -33,24 +33,11 @@ class Book {
         }
     }
 
-    public void increaseQuantity(int quantity) {
-        availableQuantity += quantity;
+    public boolean isAvailable() {
+        return availableQuantity > 0;
     }
 
     public String getDetails() {
-        return title + " | Genre: " + genre + " | Price: " + price;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Book book = (Book) obj;
-        return title.equals(book.title);
-    }
-
-    @Override
-    public int hashCode() {
-        return title.hashCode();
+        return title + " | Price: $" + price + " | Available: " + availableQuantity;
     }
 }
