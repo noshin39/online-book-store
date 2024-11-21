@@ -1,0 +1,52 @@
+import java.util.ArrayList;
+import java.util.List;
+
+class ShoppingCart {
+    private List<CartItem> cartItems = new ArrayList<>();
+
+    public void addToCart(Book book, int quantity) {
+        boolean found = false;
+        for (CartItem item : cartItems) {
+            if (item.getBook().equals(book)) {
+                item.addQuantity(quantity);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            cartItems.add(new CartItem(book, quantity));
+        }
+
+        book.reduceQuantity(quantity);
+    }
+
+    public void viewCart() {
+        if (cartItems.isEmpty()) {
+            System.out.println("Your cart is empty.");
+        } else {
+            System.out.println("Items in your cart:");
+            for (CartItem item : cartItems) {
+                Book book = item.getBook();
+                System.out.println(book.getDetails() + " | Quantity: " + item.getQuantity());
+            }
+        }
+    }
+
+    public double calculateTotal() {
+        double total = 0;
+        for (CartItem item : cartItems) {
+            total += item.getBook().getPrice() * item.getQuantity();
+        }
+        return total;
+    }
+
+    public void clearCart() {
+        for (CartItem item : cartItems) {
+            Book book = item.getBook();
+            int quantity = item.getQuantity();
+            book.increaseQuantity(quantity);
+        }
+        cartItems.clear();
+    }
+}
