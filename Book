@@ -1,37 +1,56 @@
 class Book {
-    private String bookId;
     private String title;
-    private String category;
+    private String genre;
     private double price;
     private int availableQuantity;
 
-    public Book(String bookId, String title, String category, double price, int availableQuantity) {
-        this.bookId = bookId;
+    public Book(String title, String genre, double price, int availableQuantity) {
         this.title = title;
-        this.category = category;
+        this.genre = genre;
         this.price = price;
         this.availableQuantity = availableQuantity;
-    }
-
-    public boolean checkAvailability() {
-        return availableQuantity > 0;
-    }
-
-    public String getDetails() {
-        return title + " | Category: " + category + " | Price: $" + price + " | Available: " + availableQuantity;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public String getCategory() {
-        return category;
+    public String getGenre() {
+        return genre;
     }
 
-    public void reduceQuantity() {
-        if (availableQuantity > 0) {
-            availableQuantity--;
+    public double getPrice() {
+        return price;
+    }
+
+    public int getAvailableQuantity() {
+        return availableQuantity;
+    }
+
+    public void reduceQuantity(int quantity) {
+        if (availableQuantity >= quantity) {
+            availableQuantity -= quantity;
         }
+    }
+
+    public void increaseQuantity(int quantity) {
+        availableQuantity += quantity;
+    }
+
+    public String getDetails() {
+        return title + " | Genre: " + genre + " | Price: " + price;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Book book = (Book) obj;
+        return title.equals(book.title);
+    }
+
+    @Override
+    public int hashCode() {
+        return title.hashCode();
     }
 }
