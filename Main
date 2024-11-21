@@ -1,142 +1,230 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class OnlineBookStore {
+    private static Scanner scanner = new Scanner(System.in);
     private static List<Book> books = new ArrayList<>();
-    private static UserManager userManager = new UserManager();
+    private static List<User> users = new ArrayList<>();
+    private static User loggedInUser;
+    private static ShoppingCart shoppingCart = new ShoppingCart();
 
     public static void main(String[] args) {
         initializeBooks();
-        Scanner sc = new Scanner(System.in);
-
-        while (true) {
-            System.out.println("\n--- Welcome to the Online Book Store ---");
-            System.out.println("1. Sign Up");
-            System.out.println("2. Log In");
-            System.out.println("3. Exit");
-            System.out.println("Enter your choice:");
-            int choice = sc.nextInt();
-            sc.nextLine();
-
-            switch (choice) {
-                case 1:
-                    System.out.println("Enter username:");
-                    String username = sc.nextLine();
-                    System.out.println("Enter email:");
-                    String email = sc.nextLine();
-                    System.out.println("Enter password:");
-                    String password = sc.nextLine();
-                    userManager.registerUser(username, email, password);
-                    break;
-                case 2:
-                    System.out.println("Enter email:");
-                    String loginEmail = sc.nextLine();
-                    System.out.println("Enter password:");
-                    String loginPassword = sc.nextLine();
-                    User user = userManager.loginUser(loginEmail, loginPassword);
-                    if (user != null) {
-                        openMainMenu(user);
-                    }
-                    break;
-                case 3:
-                    System.out.println("Thank you for visiting. Goodbye!");
-                    return;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-            }
-        }
-    }
-
-    private static void openMainMenu(User user) {
-        ShoppingCart cart = new ShoppingCart();
-        Scanner sc = new Scanner(System.in);
-        boolean continueShopping = true;
-
-        while (continueShopping) {
-            System.out.println("\n--- Main Menu ---");
-            System.out.println("1. View All Books");
-            System.out.println("2. Add Book to Cart");
-            System.out.println("3. View Cart");
-            System.out.println("4. Proceed to Payment");
-            System.out.println("5. Log Out");
-            System.out.println("Enter your choice:");
-            int choice = sc.nextInt();
-            sc.nextLine();
-
-            switch (choice) {
-                case 1:
-                    viewAllBooks();
-                    break;
-                case 2:
-                    System.out.println("Enter the Book ID to add to cart:");
-                    String bookId = sc.nextLine();
-                    System.out.println("Enter the quantity:");
-                    int quantity = sc.nextInt();
-                    sc.nextLine();
-                    addBookToCart(bookId, quantity, cart);
-                    break;
-                case 3:
-                    cart.viewCart();
-                    break;
-                case 4:
-                    proceedToPayment(cart);
-                    break;
-                case 5:
-                    System.out.println("Logging out...");
-                    continueShopping = false;
-                    break;
-                default:
-                    System.out.println("Invalid choice. Try again.");
-            }
-        }
+        welcomeScreen();
     }
 
     private static void initializeBooks() {
-        books.add(new Book("B001", "The Great Adventure", "Fiction", 19.99, 10));
-        books.add(new Book("B002", "Mysteries of the Universe", "Science", 29.99, 5));
-        books.add(new Book("B003", "Learn Java in 24 Hours", "Software", 39.99, 7));
-        books.add(new Book("B004", "Exploring Ancient History", "History", 24.99, 8));
-        books.add(new Book("B005", "Creative Writing for Beginners", "English", 14.99, 12));
+        books.add(new Book("Java Programming", "Software", 29.99, 10));
+        books.add(new Book("History of World", "History", 19.99, 5));
+        books.add(new Book("Advanced Chemistry", "Science", 24.99, 8));
+        books.add(new Book("English Literature", "English", 14.99, 3));
+        books.add(new Book("Fictional Adventures", "Fiction", 12.99, 6));
     }
 
-    private static void viewAllBooks() {
-        System.out.println("Available Books:");
-        for (Book book : books) {
-            System.out.println(book.getDetails());
+    private static void welcomeScreen() {
+        System.out.println("Welcome to the Online Book Store!");
+        System.out.println("1. Create an account");
+        System.out.println("2. Sign in");
+        System.out.println("3. Exit");
+        System.out.print("Choose an option: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1:
+                createAccount();
+                break;
+            case 2:
+                login();
+                break;
+            case 3:
+                System.out.println("Thank you for visiting. Goodbye!");
+                break;
+            default:
+                System.out.println("Invalid option. Please try again.");
+                welcomeScreen();
         }
     }
 
-    private static void addBookToCart(String bookId, int quantity, ShoppingCart cart) {
-        for (Book book : books) {
-            if (book.getBookId().equalsIgnoreCase(bookId)) {
-                if (book.checkAvailability() && book.availableQuantity >= quantity) {
-                    cart.addToCart(book, quantity);
-                    System.out.println(quantity + " copies of " + book.getTitle() + " added to cart.");
-                } else {
-                    System.out.println("Not enough stock available.");
-                }
+    private static void createAccount() {
+        System.out.print("Enter your name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter your email: ");
+        String email = scanner.nextLine();
+
+        for (User user : users) {
+            if (user.getEmail().equals(email)) {
+                System.out.println("This email is already registered. Please log in.");
+                welcomeScreen();
                 return;
             }
         }
-        System.out.println("Book not found.");
+
+        System.out.print("Enter a password: ");
+        String password = scanner.nextLine();
+        users.add(new User(name, email, password));
+        System.out.println("Account created successfully!");
+        welcomeScreen();
     }
 
-    private static void proceedToPayment(ShoppingCart cart) {
-        if (cart != null) {
-            Payment payment = new Payment();
-            double totalAmount = cart.calculateTotal();
-            if (totalAmount > 0) {
-                System.out.println("Total amount: $" + totalAmount);
-                if (payment.processPayment(totalAmount)) {
-                    System.out.println("Payment successful. Thank you for your purchase!");
-                    cart.clearCart();
+    private static void login() {
+        System.out.print("Enter your email: ");
+        String email = scanner.nextLine();
+        System.out.print("Enter your password: ");
+        String password = scanner.nextLine();
+
+        for (User user : users) {
+            if (user.getEmail().equals(email) && user.checkPassword(password)) {
+                loggedInUser = user;
+                shoppingCart = new ShoppingCart();
+                showMainMenu();
+                return;
+            }
+        }
+
+        System.out.println("Invalid email or password. Try again.");
+        welcomeScreen();
+    }
+
+    private static void showMainMenu() {
+        System.out.println("\nMain Menu:");
+        System.out.println("1. Search by genre");
+        System.out.println("2. View cart");
+        System.out.println("3. Checkout and leave");
+        System.out.println("4. Log out");
+        System.out.print("Choose an option: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1:
+                searchByGenre();
+                break;
+            case 2:
+                shoppingCart.viewCart();
+                showMainMenu();
+                break;
+            case 3:
+                checkout();
+                break;
+            case 4:
+                System.out.println("Logged out successfully.");
+                welcomeScreen();
+                break;
+            default:
+                System.out.println("Invalid option. Please try again.");
+                showMainMenu();
+        }
+    }
+
+    private static void searchByGenre() {
+        Set<String> genres = new HashSet<>();
+        for (Book book : books) {
+            genres.add(book.getGenre());
+        }
+
+        System.out.println("Available genres:");
+        List<String> genreList = new ArrayList<>(genres);
+        for (int i = 0; i < genreList.size(); i++) {
+            System.out.println((i + 1) + ". " + genreList.get(i));
+        }
+
+        System.out.print("Select a genre (0 to go back): ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        if (choice == 0) {
+            showMainMenu();
+            return;
+        }
+
+        if (choice > 0 && choice <= genreList.size()) {
+            String selectedGenre = genreList.get(choice - 1);
+            List<Book> genreBooks = new ArrayList<>();
+            for (Book book : books) {
+                if (book.getGenre().equals(selectedGenre)) {
+                    genreBooks.add(book);
+                }
+            }
+
+            System.out.println("Books available in " + selectedGenre + ":");
+            for (int i = 0; i < genreBooks.size(); i++) {
+                Book book = genreBooks.get(i);
+                System.out.println((i + 1) + ". " + book.getDetails());
+            }
+
+            System.out.print("Select a book to add to cart (0 to go back): ");
+            int bookChoice = scanner.nextInt();
+            scanner.nextLine();
+
+            if (bookChoice == 0) {
+                searchByGenre();
+            } else if (bookChoice > 0 && bookChoice <= genreBooks.size()) {
+                Book selectedBook = genreBooks.get(bookChoice - 1);
+                if (selectedBook.isAvailable()) {
+                    System.out.print("Enter quantity: ");
+                    int quantity = scanner.nextInt();
+                    scanner.nextLine();
+
+                    if (quantity > 0 && quantity <= selectedBook.getAvailableQuantity()) {
+                        shoppingCart.addToCart(selectedBook, quantity);
+                        System.out.println("Book added to cart.");
+                        postAddToCart();
+                    } else {
+                        System.out.println("Invalid quantity. Please try again.");
+                        searchByGenre();
+                    }
                 } else {
-                    System.out.println("Payment failed.");
+                    System.out.println("Sorry, this book is out of stock.");
+                    searchByGenre();
                 }
             } else {
-                System.out.println("Your cart is empty.");
+                System.out.println("Invalid selection. Please try again.");
+                searchByGenre();
             }
+        } else {
+            System.out.println("Invalid option. Please try again.");
+            searchByGenre();
+        }
+    }
+
+    private static void postAddToCart() {
+        System.out.println("1. Continue shopping");
+        System.out.println("2. Checkout and leave");
+        System.out.print("Choose an option: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (choice) {
+            case 1:
+                searchByGenre();
+                break;
+            case 2:
+                checkout();
+                break;
+            default:
+                System.out.println("Invalid option. Returning to main menu.");
+                showMainMenu();
+        }
+    }
+
+    private static void checkout() {
+        System.out.println("Checkout:");
+        shoppingCart.viewCart();
+        double total = shoppingCart.calculateTotal();
+        System.out.println("Total: $" + total);
+
+        System.out.print("Enter payment amount: $");
+        double payment = scanner.nextDouble();
+        scanner.nextLine();
+
+        if (payment >= total) {
+            System.out.println("Payment successful! Thank you for your purchase.");
+            shoppingCart.clearCart();
+            System.out.println("Returning to the main menu...");
+            showMainMenu();
+        } else {
+            System.out.println("Insufficient payment. Please try again.");
+            checkout();
         }
     }
 }
