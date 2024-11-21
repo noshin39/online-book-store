@@ -4,66 +4,95 @@ import java.util.Scanner;
 
 public class OnlineBookStore {
     private static List<Book> books = new ArrayList<>();
+    private static UserManager userManager = new UserManager();
 
     public static void main(String[] args) {
         initializeBooks();
-        User user = new User("U001", "John Doe", "john@example.com", "password123");
-        ShoppingCart cart = new ShoppingCart();
-        
         Scanner sc = new Scanner(System.in);
-        System.out.println("Enter email:");
-        String email = sc.nextLine();
-        System.out.println("Enter password:");
-        String password = sc.nextLine();
-        
-        if (user.login(email, password)) {
-            System.out.println("Welcome, " + user.getUsername() + "!");
-            boolean continueShopping = true;
-            
-            while (continueShopping) {
-                System.out.println("\n--- Menu ---");
-                System.out.println("1. Search by Title");
-                System.out.println("2. Search by Genre");
-                System.out.println("3. Proceed to Payment");
-                System.out.println("4. Exit");
-                System.out.println("Enter your choice:");
-                int choice = sc.nextInt();
-                sc.nextLine();
 
-                switch (choice) {
-                    case 1:
-                        System.out.println("Enter book title:");
-                        String title = sc.nextLine();
-                        searchByTitle(title, cart);
-                        break;
-                    case 2:
-                        System.out.println("Enter genre:");
-                        String genre = sc.nextLine();
-                        searchByGenre(genre, cart);
-                        break;
-                    case 3:
-                        cart.viewCart();
-                        cart.checkout(user);
-                        System.out.println("1. Back to Main Menu\n2. Exit");
-                        int postPaymentChoice = sc.nextInt();
-                        sc.nextLine();
-                        if (postPaymentChoice == 2) {
-                            continueShopping = false;
-                        }
-                        break;
-                    case 4:
-                        continueShopping = false;
-                        break;
-                    default:
-                        System.out.println("Invalid choice. Try again.");
-                }
+        while (true) {
+            System.out.println("\n--- Welcome to the Online Book Store ---");
+            System.out.println("1. Sign Up");
+            System.out.println("2. Log In");
+            System.out.println("3. Exit");
+            System.out.println("Enter your choice:");
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1:
+                    System.out.println("Enter username:");
+                    String username = sc.nextLine();
+                    System.out.println("Enter email:");
+                    String email = sc.nextLine();
+                    System.out.println("Enter password:");
+                    String password = sc.nextLine();
+                    userManager.registerUser(username, email, password);
+                    break;
+                case 2:
+                    System.out.println("Enter email:");
+                    String loginEmail = sc.nextLine();
+                    System.out.println("Enter password:");
+                    String loginPassword = sc.nextLine();
+                    User user = userManager.loginUser(loginEmail, loginPassword);
+                    if (user != null) {
+                        openMainMenu(user);
+                    }
+                    break;
+                case 3:
+                    System.out.println("Thank you for visiting. Goodbye!");
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
             }
-        } else {
-            System.out.println("Invalid login credentials.");
         }
     }
 
-    public static void initializeBooks() {
+    private static void openMainMenu(User user) {
+        ShoppingCart cart = new ShoppingCart();
+        Scanner sc = new Scanner(System.in);
+        boolean continueShopping = true;
+
+        while (continueShopping) {
+            System.out.println("\n--- Main Menu ---");
+            System.out.println("1. View All Books");
+            System.out.println("2. Add Book to Cart");
+            System.out.println("3. View Cart");
+            System.out.println("4. Proceed to Payment");
+            System.out.println("5. Log Out");
+            System.out.println("Enter your choice:");
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1:
+                    viewAllBooks();
+                    break;
+                case 2:
+                    System.out.println("Enter the Book ID to add to cart:");
+                    String bookId = sc.nextLine();
+                    System.out.println("Enter the quantity:");
+                    int quantity = sc.nextInt();
+                    sc.nextLine();
+                    addBookToCart(bookId, quantity, cart);
+                    break;
+                case 3:
+                    cart.viewCart();
+                    break;
+                case 4:
+                    proceedToPayment(cart);
+                    break;
+                case 5:
+                    System.out.println("Logging out...");
+                    continueShopping = false;
+                    break;
+                default:
+                    System.out.println("Invalid choice. Try again.");
+            }
+        }
+    }
+
+    private static void initializeBooks() {
         books.add(new Book("B001", "The Great Adventure", "Fiction", 19.99, 10));
         books.add(new Book("B002", "Mysteries of the Universe", "Science", 29.99, 5));
         books.add(new Book("B003", "Learn Java in 24 Hours", "Software", 39.99, 7));
@@ -71,75 +100,43 @@ public class OnlineBookStore {
         books.add(new Book("B005", "Creative Writing for Beginners", "English", 14.99, 12));
     }
 
-    public static void searchByTitle(String title, ShoppingCart cart) {
-        boolean found = false;
-        Scanner sc = new Scanner(System.in);
+    private static void viewAllBooks() {
+        System.out.println("Available Books:");
         for (Book book : books) {
-            if (book.getTitle().equalsIgnoreCase(title)) {
-                System.out.println(book.getDetails());
-                if (book.checkAvailability()) {
-                    System.out.println("Do you want to add this book to the cart? (yes/no)");
-                    String response = sc.nextLine();
-                    if (response.equalsIgnoreCase("yes")) {
-                        cart.selectBook(book);
-                        System.out.println(book.getTitle() + " added to cart.");
-                        postAddToCartOptions(cart);
-                    }
-                } else {
-                    System.out.println("Sorry, this book is out of stock.");
-                }
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            System.out.println("No books found with title " + title);
+            System.out.println(book.getDetails());
         }
     }
 
-    public static void searchByGenre(String genre, ShoppingCart cart) {
-        boolean found = false;
-        Scanner sc = new Scanner(System.in);
+    private static void addBookToCart(String bookId, int quantity, ShoppingCart cart) {
         for (Book book : books) {
-            if (book.getCategory().equalsIgnoreCase(genre)) {
-                System.out.println(book.getDetails());
-                if (book.checkAvailability()) {
-                    System.out.println("Do you want to add this book to the cart? (yes/no)");
-                    String response = sc.nextLine();
-                    if (response.equalsIgnoreCase("yes")) {
-                        cart.selectBook(book);
-                        System.out.println(book.getTitle() + " added to cart.");
-                        postAddToCartOptions(cart);
-                    }
+            if (book.getBookId().equalsIgnoreCase(bookId)) {
+                if (book.checkAvailability() && book.availableQuantity >= quantity) {
+                    cart.addToCart(book, quantity);
+                    System.out.println(quantity + " copies of " + book.getTitle() + " added to cart.");
                 } else {
-                    System.out.println("Sorry, this book is out of stock.");
+                    System.out.println("Not enough stock available.");
                 }
-                found = true;
+                return;
             }
         }
-        if (!found) {
-            System.out.println("No books found in genre " + genre);
-        }
+        System.out.println("Book not found.");
     }
 
-    public static void postAddToCartOptions(ShoppingCart cart) {
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Do you want to:\n1. Proceed to Payment\n2. Continue Browsing");
-        int choice = sc.nextInt();
-        sc.nextLine();
-        if (choice == 1) {
-            cart.viewCart();
-            cart.checkout(new User("U001", "John Doe", "john@example.com", "password123"));
-            System.out.println("1. Back to Main Menu\n2. Exit");
-            int postPaymentChoice = sc.nextInt();
-            sc.nextLine();
-            if (postPaymentChoice == 2) {
-                System.exit(0);
+    private static void proceedToPayment(ShoppingCart cart) {
+        if (cart != null) {
+            Payment payment = new Payment();
+            double totalAmount = cart.calculateTotal();
+            if (totalAmount > 0) {
+                System.out.println("Total amount: $" + totalAmount);
+                if (payment.processPayment(totalAmount)) {
+                    System.out.println("Payment successful. Thank you for your purchase!");
+                    cart.clearCart();
+                } else {
+                    System.out.println("Payment failed.");
+                }
+            } else {
+                System.out.println("Your cart is empty.");
             }
-        } else if (choice == 2) {
-            System.out.println("Returning to menu...");
-        } else {
-            System.out.println("Invalid choice. Returning to menu...");
         }
     }
 }
