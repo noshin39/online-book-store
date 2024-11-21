@@ -1,32 +1,45 @@
-class ShoppingCart {
-    private Book selectedBook;
+import java.util.HashMap;
+import java.util.Map;
 
-    public void selectBook(Book book) {
-        this.selectedBook = book;
+class ShoppingCart {
+    private Map<Book, Integer> cartItems = new HashMap<>();
+
+    public void addToCart(Book book, int quantity) {
+        if (book.checkAvailability() && book.availableQuantity >= quantity) {
+            cartItems.put(book, cartItems.getOrDefault(book, 0) + quantity);
+            book.reduceQuantity(quantity);
+        } else {
+            System.out.println("Not enough stock for " + book.getTitle());
+        }
     }
 
     public void viewCart() {
-        if (selectedBook == null) {
+        if (cartItems.isEmpty()) {
             System.out.println("Your cart is empty.");
         } else {
-            System.out.println("Selected Book:");
-            System.out.println(selectedBook.getDetails());
+            System.out.println("Items in your cart:");
+            for (Map.Entry<Book, Integer> entry : cartItems.entrySet()) {
+                Book book = entry.getKey();
+                int quantity = entry.getValue();
+                System.out.println(book.getDetails() + " | Quantity: " + quantity);
+            }
         }
     }
 
-    public void checkout(User user) {
-        if (selectedBook != null) {
-            System.out.println("Proceeding to checkout for " + user.getUsername());
-            Payment payment = new Payment();
-            if (payment.processPayment(selectedBook.getPrice())) {
-                selectedBook.reduceQuantity();
-                System.out.println("Payment successful! Book purchased.");
-                System.out.println("You have purchased: " + selectedBook.getTitle());
-            } else {
-                System.out.println("Payment failed! Please try again.");
-            }
-        } else {
-            System.out.println("No book selected. Cannot checkout.");
+    public double calculateTotal() {
+        double total = 0;
+        for (Map.Entry<Book, Integer> entry : cartItems.entrySet()) {
+            total += entry.getKey().price * entry.getValue();
         }
+        return total;
+    }
+
+    public void clearCart() {
+        for (Map.Entry<Book, Integer> entry : cartItems.entrySet()) {
+            Book book = entry.getKey();
+            int quantity = entry.getValue();
+            book.increaseQuantity(quantity);
+        }
+        cartItems.clear();
     }
 }
