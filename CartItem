@@ -20,6 +20,6 @@ class CartItem {
     }
 
     public String getCartDetails() {
-        return book.getTitle() + " | Quantity: " + quantity + " | Total: $" + (book.getPrice() * quantity);
+        return book.getTitle() + " | Quantity: " + quantity + " | Total:" + (book.getPrice() * quantity+"Tk");
     }
 }
