@@ -1,230 +1,227 @@
 import java.util.*;
 
 public class OnlineBookStore {
-    private static Scanner scanner = new Scanner(System.in);
-    private static List<Book> books = new ArrayList<>();
+    private static final List<Book> books = new ArrayList<>();
+    private static ShoppingCart cart = new ShoppingCart();
     private static List<User> users = new ArrayList<>();
     private static User loggedInUser;
-    private static ShoppingCart shoppingCart = new ShoppingCart();
+
+    static {
+        books.add(new Book("Java Basics", "Programming", 1200, 10));
+        books.add(new Book("Data Structures", "Programming", 1350, 5));
+        books.add(new Book("Advanced Algorithms", "Programming", 2000, 7));
+        books.add(new Book("Introduction to AI", "Programming", 1250, 4));
+        books.add(new Book("Web Development", "Programming", 1500, 8));
+
+        books.add(new Book("Ancient History", "History", 2400, 6));
+        books.add(new Book("World War II", "History", 2150, 10));
+        books.add(new Book("Medieval Europe", "History", 1600, 2));
+        books.add(new Book("Renaissance Art", "History", 2250, 3));
+        books.add(new Book("Modern History", "History", 1500, 7));
+
+        books.add(new Book("Astrophysics for Beginners", "Science", 1500, 8));
+        books.add(new Book("Chemistry Fundamentals", "Science", 2750, 9));
+        books.add(new Book("Biology: Life on Earth", "Science", 3000, 10));
+        books.add(new Book("Physics in Action", "Science", 4000, 5));
+        books.add(new Book("Environmental Science", "Science", 2000, 4));
+
+        books.add(new Book("Shakespeare's Sonnets", "Literature", 1500, 6));
+        books.add(new Book("Modern Poetry", "Literature", 1850, 8));
+        books.add(new Book("Classic Novels", "Literature", 2500, 10));
+        books.add(new Book("Contemporary Fiction", "Literature", 2200, 7));
+        books.add(new Book("Mythology and Legends", "Literature", 2000, 3));
+
+        books.add(new Book("Self-Improvement Guide", "Self-Help", 1800, 5));
+        books.add(new Book("Mindfulness and Meditation", "Self-Help", 1450, 8));
+        books.add(new Book("Leadership Skills", "Self-Help", 1900, 4));
+        books.add(new Book("Emotional Intelligence", "Self-Help", 1650, 7));
+        books.add(new Book("Time Management", "Self-Help", 2000, 9));
+    }
 
     public static void main(String[] args) {
-        initializeBooks();
-        welcomeScreen();
-    }
+        Scanner scanner = new Scanner(System.in);
+        boolean running = true;
 
-    private static void initializeBooks() {
-        books.add(new Book("Java Programming", "Software", 29.99, 10));
-        books.add(new Book("History of World", "History", 19.99, 5));
-        books.add(new Book("Advanced Chemistry", "Science", 24.99, 8));
-        books.add(new Book("English Literature", "English", 14.99, 3));
-        books.add(new Book("Fictional Adventures", "Fiction", 12.99, 6));
-    }
+        while (running) {
+            if (loggedInUser == null) {
+                System.out.println("Welcome to the Online Book Store!");
+                System.out.println("1. Login");
+                System.out.println("2. Create Account");
+                System.out.println("3. Exit");
+                System.out.print("Choose an option: ");
+                int choice = scanner.nextInt();
+                scanner.nextLine(); 
 
-    private static void welcomeScreen() {
-        System.out.println("Welcome to the Online Book Store!");
-        System.out.println("1. Create an account");
-        System.out.println("2. Sign in");
-        System.out.println("3. Exit");
-        System.out.print("Choose an option: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        switch (choice) {
-            case 1:
-                createAccount();
-                break;
-            case 2:
-                login();
-                break;
-            case 3:
-                System.out.println("Thank you for visiting. Goodbye!");
-                break;
-            default:
-                System.out.println("Invalid option. Please try again.");
-                welcomeScreen();
-        }
-    }
-
-    private static void createAccount() {
-        System.out.print("Enter your name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter your email: ");
-        String email = scanner.nextLine();
-
-        for (User user : users) {
-            if (user.getEmail().equals(email)) {
-                System.out.println("This email is already registered. Please log in.");
-                welcomeScreen();
-                return;
+                switch (choice) {
+                    case 1 -> login();
+                    case 2 -> createAccount();
+                    case 3 -> {
+                        System.out.println("Thank you for visiting the Online Book Store. Goodbye!");
+                        running = false;
+                    }
+                    default -> System.out.println("Invalid option. Please try again.");
+                }
+            } else {
+                System.out.println("1. Search by Genre");
+                System.out.println("2. View Cart");
+                System.out.println("3. Checkout and Leave");
+                System.out.println("4. Log Out");
+                System.out.println("5. Exit");
+                System.out.print("Choose an option: ");
+                int choice = scanner.nextInt();
+                scanner.nextLine(); 
+                
+                switch (choice) {
+                    case 1 -> searchByGenre();
+                    case 2 -> cart.viewCart();
+                    case 3 -> Logout();
+                    case 4 -> Checkout();
+                    case 5 -> {
+                        System.out.println("Thank you for visiting the Online Book Store. Goodbye!");
+                        running = false;
+                    }
+                    default -> System.out.println("Invalid option. Please try again.");
+                }
             }
         }
 
-        System.out.print("Enter a password: ");
-        String password = scanner.nextLine();
-        users.add(new User(name, email, password));
-        System.out.println("Account created successfully!");
-        welcomeScreen();
+        scanner.close();
     }
 
     private static void login() {
+        Scanner scanner = new Scanner(System.in);
         System.out.print("Enter your email: ");
         String email = scanner.nextLine();
         System.out.print("Enter your password: ");
         String password = scanner.nextLine();
 
         for (User user : users) {
-            if (user.getEmail().equals(email) && user.checkPassword(password)) {
+            if (user.getEmail().equalsIgnoreCase(email) && user.checkPassword(password)) {
                 loggedInUser = user;
-                shoppingCart = new ShoppingCart();
-                showMainMenu();
+                System.out.println("Login successful!");
                 return;
             }
         }
 
-        System.out.println("Invalid email or password. Try again.");
-        welcomeScreen();
+        System.out.println("Invalid email or password. Please try again.");
     }
 
-    private static void showMainMenu() {
-        System.out.println("\nMain Menu:");
-        System.out.println("1. Search by genre");
-        System.out.println("2. View cart");
-        System.out.println("3. Checkout and leave");
-        System.out.println("4. Log out");
-        System.out.print("Choose an option: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine();
+    private static void createAccount() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter your name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter your email: ");
+        String email = scanner.nextLine();
 
-        switch (choice) {
-            case 1:
-                searchByGenre();
-                break;
-            case 2:
-                shoppingCart.viewCart();
-                showMainMenu();
-                break;
-            case 3:
-                checkout();
-                break;
-            case 4:
-                System.out.println("Logged out successfully.");
-                welcomeScreen();
-                break;
-            default:
-                System.out.println("Invalid option. Please try again.");
-                showMainMenu();
+        for (User user : users) {
+            if (user.getEmail().equalsIgnoreCase(email)) {
+                System.out.println("Email already exists. Please login.");
+                return;
+            }
         }
+
+        System.out.print("Enter your password: ");
+        String password = scanner.nextLine();
+        users.add(new User(name, email, password));
+        System.out.println("Account created successfully! You can now log in.");
     }
 
     private static void searchByGenre() {
-        Set<String> genres = new HashSet<>();
-        for (Book book : books) {
-            genres.add(book.getGenre());
+    Scanner scanner = new Scanner(System.in);
+    System.out.println("Available genres:");
+    System.out.println("1. Programming\n2. History\n3. Science\n4. Literature\n5. Self-Help");
+    System.out.print("Enter the genre number to browse books: ");
+    int genreChoice = scanner.nextInt();
+    scanner.nextLine();
+
+    String selectedGenre = "";
+
+    switch (genreChoice) {
+        case 1 -> selectedGenre = "Programming";
+        case 2 -> selectedGenre = "History";
+        case 3 -> selectedGenre = "Science";
+        case 4 -> selectedGenre = "Literature";
+        case 5 -> selectedGenre = "Self-Help";
+        default -> {
+            System.out.println("Invalid choice. Returning to main menu.");
+            return;
         }
+    }
 
-        System.out.println("Available genres:");
-        List<String> genreList = new ArrayList<>(genres);
-        for (int i = 0; i < genreList.size(); i++) {
-            System.out.println((i + 1) + ". " + genreList.get(i));
+    List<Book> genreBooks = new ArrayList<>();
+    for (Book book : books) {
+        if (book.getGenre().equalsIgnoreCase(selectedGenre)) {
+            genreBooks.add(book);
         }
+    }
 
-        System.out.print("Select a genre (0 to go back): ");
-        int choice = scanner.nextInt();
-        scanner.nextLine();
+    if (genreBooks.isEmpty()) {
+        System.out.println("No books available in this genre.");
+        return;
+    }
 
-        if (choice == 0) {
-            showMainMenu();
+    System.out.println("Books in " + selectedGenre + " genre:");
+    for (int i = 0; i < genreBooks.size(); i++) {
+        Book book = genreBooks.get(i);
+        System.out.println((i + 1) + ". " + book.getTitle() + " - " + book.getPrice() + "Tk - In stock: " + book.getAvailableQuantity());
+    }
+
+    System.out.print("Select the book number to add to cart (0 to go back): ");
+    int bookChoice = scanner.nextInt();
+    scanner.nextLine(); 
+    
+    if (bookChoice == 0) {
+        return; 
+    }
+
+    if (bookChoice > 0 && bookChoice <= genreBooks.size()) {
+        Book selectedBook = genreBooks.get(bookChoice - 1);
+        System.out.print("Enter quantity to add to cart: ");
+        int quantity = scanner.nextInt();
+        scanner.nextLine(); 
+
+        if (quantity > 0 && quantity <= selectedBook.getAvailableQuantity()) {
+            cart.addToCart(selectedBook, quantity);
+            selectedBook.reduceQuantity(quantity);
+            System.out.println(quantity + " copies of \"" + selectedBook.getTitle() + "\" added to cart.");
+        } else {
+            System.out.println("Invalid quantity. Returning to genre selection.");
+        }
+    } else {
+        System.out.println("Invalid selection. Returning to genre selection.");
+    }
+    }
+    private static void Checkout() {
+        if (cart.isEmpty()) {
+            System.out.println("Your cart is empty. Please add books to the cart before checking out.");
             return;
         }
 
-        if (choice > 0 && choice <= genreList.size()) {
-            String selectedGenre = genreList.get(choice - 1);
-            List<Book> genreBooks = new ArrayList<>();
-            for (Book book : books) {
-                if (book.getGenre().equals(selectedGenre)) {
-                    genreBooks.add(book);
-                }
-            }
+        System.out.println("Checking out...");
+        double totalAmount = cart.getTotalPrice();
+        System.out.println("Total amount: " + totalAmount + "Tk");
 
-            System.out.println("Books available in " + selectedGenre + ":");
-            for (int i = 0; i < genreBooks.size(); i++) {
-                Book book = genreBooks.get(i);
-                System.out.println((i + 1) + ". " + book.getDetails());
-            }
-
-            System.out.print("Select a book to add to cart (0 to go back): ");
-            int bookChoice = scanner.nextInt();
-            scanner.nextLine();
-
-            if (bookChoice == 0) {
-                searchByGenre();
-            } else if (bookChoice > 0 && bookChoice <= genreBooks.size()) {
-                Book selectedBook = genreBooks.get(bookChoice - 1);
-                if (selectedBook.isAvailable()) {
-                    System.out.print("Enter quantity: ");
-                    int quantity = scanner.nextInt();
-                    scanner.nextLine();
-
-                    if (quantity > 0 && quantity <= selectedBook.getAvailableQuantity()) {
-                        shoppingCart.addToCart(selectedBook, quantity);
-                        System.out.println("Book added to cart.");
-                        postAddToCart();
-                    } else {
-                        System.out.println("Invalid quantity. Please try again.");
-                        searchByGenre();
-                    }
-                } else {
-                    System.out.println("Sorry, this book is out of stock.");
-                    searchByGenre();
-                }
-            } else {
-                System.out.println("Invalid selection. Please try again.");
-                searchByGenre();
-            }
-        } else {
-            System.out.println("Invalid option. Please try again.");
-            searchByGenre();
-        }
-    }
-
-    private static void postAddToCart() {
-        System.out.println("1. Continue shopping");
-        System.out.println("2. Checkout and leave");
-        System.out.print("Choose an option: ");
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        switch (choice) {
-            case 1:
-                searchByGenre();
-                break;
-            case 2:
-                checkout();
-                break;
-            default:
-                System.out.println("Invalid option. Returning to main menu.");
-                showMainMenu();
-        }
-    }
-
-    private static void checkout() {
-        System.out.println("Checkout:");
-        shoppingCart.viewCart();
-        double total = shoppingCart.calculateTotal();
-        System.out.println("Total: $" + total);
-
-        System.out.print("Enter payment amount: $");
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter payment amount: ");
         double payment = scanner.nextDouble();
-        scanner.nextLine();
+        scanner.nextLine(); 
 
-        if (payment >= total) {
-            System.out.println("Payment successful! Thank you for your purchase.");
-            shoppingCart.clearCart();
-            System.out.println("Returning to the main menu...");
-            showMainMenu();
+        if (payment < totalAmount) {
+            System.out.println("Insufficient payment. Transaction cancelled.");
         } else {
-            System.out.println("Insufficient payment. Please try again.");
-            checkout();
+            double change = payment - totalAmount;
+            System.out.println("Payment successful. Change: " + change + "Tk");
+            cart.clearCart();
+            System.out.println("Thank you for your purchase!");
+        }
+}
+    
+        private static void Logout() {
+        if (loggedInUser != null) {
+            loggedInUser = null; 
+            System.out.println("You have successfully logged out.");
+        } else {
+            System.out.println("No user is logged in.");
         }
     }
 }
