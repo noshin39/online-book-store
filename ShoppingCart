@@ -1,41 +1,64 @@
 import java.util.ArrayList;
 import java.util.List;
 
-class ShoppingCart {
-    private List<CartItem> cartItems = new ArrayList<>();
+public class ShoppingCart {
+    private List<CartItem> items = new ArrayList<>();
 
     public void addToCart(Book book, int quantity) {
-        for (CartItem item : cartItems) {
+        for (CartItem item : items) {
             if (item.getBook().equals(book)) {
-                item.addQuantity(quantity);
-                book.reduceQuantity(quantity);
+                item.setQuantity(item.getQuantity() + quantity);
                 return;
             }
         }
-        cartItems.add(new CartItem(book, quantity));
-        book.reduceQuantity(quantity);
+        items.add(new CartItem(book, quantity));
     }
 
     public void viewCart() {
-        if (cartItems.isEmpty()) {
+        if (isEmpty()) {
             System.out.println("Your cart is empty.");
         } else {
-            System.out.println("Items in your cart:");
-            for (CartItem item : cartItems) {
-                System.out.println(item.getCartDetails());
+            System.out.println("Your Shopping Cart:");
+            for (CartItem item : items) {
+                System.out.println(item.getBook().getTitle() + " - " + item.getQuantity() + " copies - " + item.getBook().getPrice() + "Tk each");
             }
         }
     }
 
-    public double calculateTotal() {
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
+
+    public double getTotalPrice() {
         double total = 0;
-        for (CartItem item : cartItems) {
+        for (CartItem item : items) {
             total += item.getBook().getPrice() * item.getQuantity();
         }
         return total;
     }
 
     public void clearCart() {
-        cartItems.clear();
+        items.clear();
+    }
+    private static class CartItem {
+        private Book book;
+        private int quantity;
+
+        public CartItem(Book book, int quantity) {
+            this.book = book;
+            this.quantity = quantity;
+        }
+
+        public Book getBook() {
+            return book;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
     }
 }
